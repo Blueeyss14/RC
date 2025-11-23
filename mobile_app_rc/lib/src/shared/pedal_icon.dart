@@ -22,7 +22,7 @@ class PedalIcon extends StatelessWidget {
       onLongPressEnd: onLongPressEnd,
       child: AnimatedPadding(
         padding: EdgeInsets.only(top: paddingTop ?? 0),
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 100),
         child: Image.asset(
           pedal ?? IconAssets.throttle,
           height: double.infinity,

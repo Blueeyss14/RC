@@ -1,26 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:rc/src/res/angles.dart';
 import 'package:rc/src/res/assets.dart';
+import 'package:rc/src/res/colors.dart';
 
-class SteeringWheelIcon extends StatefulWidget {
+class SteeringWheelIcon extends StatelessWidget {
   final String? pedal;
   final double? angle;
-  const SteeringWheelIcon({super.key, this.pedal, this.angle});
+  final double? scale;
 
-  @override
-  State<SteeringWheelIcon> createState() => _SteeringWheelIconState();
-}
+  final void Function(LongPressStartDetails)? onLongPressStart;
+  final void Function(LongPressEndDetails)? onLongPressEnd;
+  const SteeringWheelIcon({
+    super.key,
+    this.pedal,
+    this.angle,
+    this.onLongPressStart,
+    this.onLongPressEnd,
+    this.scale,
+  });
 
-class _SteeringWheelIconState extends State<SteeringWheelIcon> {
   @override
   Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: widget.angle ?? SteeringAngle.left,
-      child: FractionallySizedBox(
-        heightFactor: 0.6,
-        child: Image.asset(
-          widget.pedal ?? IconAssets.arrow,
-          height: double.infinity / 2,
+    return GestureDetector(
+      onLongPressStart: onLongPressStart,
+      onLongPressEnd: onLongPressEnd,
+      child: AnimatedScale(
+        scale: scale ?? 1,
+        duration: const Duration(milliseconds: 100),
+        child: Transform.rotate(
+          angle: angle ?? SteeringAngle.left,
+          child: FractionallySizedBox(
+            heightFactor: 0.6,
+            child: Image.asset(
+              color: CarColors.gray,
+              pedal ?? IconAssets.arrow,
+              height: double.infinity / 2,
+            ),
+          ),
         ),
       ),
     );
