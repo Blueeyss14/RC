@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:rc/src/features/views/car.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -12,6 +14,14 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarDividerColor: Colors.transparent,
+      statusBarColor: Colors.transparent,
+    ),
+  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 }
 
 class MyApp extends StatelessWidget {
@@ -19,13 +29,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MotorControlPage(),
-    );
+    return const MaterialApp(debugShowCheckedModeBanner: false, home: Car());
   }
 }
-
+/*
 class MotorControlPage extends StatefulWidget {
   const MotorControlPage({super.key});
 
@@ -86,41 +93,52 @@ class _MotorControlPageState extends State<MotorControlPage> {
 
       setState(() => streamStatus = "Streaming...");
 
-      List<int> buffer = [];
-      const startMarker = [0xFF, 0xD8];
-      const endMarker = [0xFF, 0xD9];
+      final buffer = BytesBuilder(copy: false);
+      int lastStartIndex = -1;
 
       _streamSubscription = response.stream.listen(
         (chunk) {
-          buffer.addAll(chunk);
+          buffer.add(chunk);
+          final bytes = buffer.toBytes();
 
-          int startIndex = -1;
-          int endIndex = -1;
-
-          for (int i = 0; i < buffer.length - 1; i++) {
-            if (buffer[i] == startMarker[0] &&
-                buffer[i + 1] == startMarker[1]) {
-              startIndex = i;
-            }
-            if (buffer[i] == endMarker[0] && buffer[i + 1] == endMarker[1]) {
-              endIndex = i + 1;
-              break;
+          int startIndex = lastStartIndex;
+          if (startIndex == -1) {
+            for (int i = 0; i < bytes.length - 1; i++) {
+              if (bytes[i] == 0xFF && bytes[i + 1] == 0xD8) {
+                startIndex = i;
+                break;
+              }
             }
           }
 
-          if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
-            final frame = buffer.sublist(startIndex, endIndex + 1);
-            if (mounted) {
-              setState(() {
-                _currentFrame = Uint8List.fromList(frame);
-                streamStatus = "Live";
-              });
+          if (startIndex != -1) {
+            for (int i = startIndex + 2; i < bytes.length - 1; i++) {
+              if (bytes[i] == 0xFF && bytes[i + 1] == 0xD9) {
+                final frame = Uint8List.view(
+                  bytes.buffer,
+                  startIndex,
+                  i - startIndex + 2,
+                );
+                if (mounted) {
+                  setState(() {
+                    _currentFrame = frame;
+                    streamStatus = "Live";
+                  });
+                }
+                buffer.clear();
+                buffer.add(
+                  Uint8List.view(bytes.buffer, i + 2, bytes.length - i - 2),
+                );
+                lastStartIndex = -1;
+                return;
+              }
             }
-            buffer = buffer.sublist(endIndex + 1);
+            lastStartIndex = startIndex;
           }
 
-          if (buffer.length > 100000) {
+          if (buffer.length > 50000) {
             buffer.clear();
+            lastStartIndex = -1;
           }
         },
         onError: (error) {
@@ -282,6 +300,7 @@ class _MotorControlPageState extends State<MotorControlPage> {
                         _currentFrame!,
                         fit: BoxFit.cover,
                         gaplessPlayback: true,
+                        cacheWidth: 640,
                       )
                     : Center(
                         child: Column(
@@ -383,3 +402,4 @@ class _MotorControlPageState extends State<MotorControlPage> {
     );
   }
 }
+*/
