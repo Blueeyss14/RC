@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
 import 'package:rc/src/core/config/config.dart';
+import 'package:rc/src/res/constant.dart';
 
 class CarViewmodel extends GetxController {
   var isThrottleClicked = false.obs;
@@ -113,7 +114,7 @@ class CarViewmodel extends GetxController {
   Future<void> sendCommand(String cmd) async {
     try {
       final res = await http
-          .get(Uri.parse("${Config.baseUrl}/$cmd"))
+          .get(Uri.parse("${Config.baseUrl}/${CommandString.command}"))
           .timeout(const Duration(seconds: 1));
       statusText.value = "STATUS: ${res.body}";
     } catch (_) {
