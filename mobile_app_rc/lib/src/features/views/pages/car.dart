@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
 import 'package:rc/src/features/viewmodels/car_viewmodel.dart';
+import 'package:rc/src/features/views/components/camera_component.dart';
 import 'package:rc/src/features/views/components/pedal_components.dart';
 import 'package:rc/src/features/views/components/steering_wheel_component.dart';
 import 'package:rc/src/res/angles.dart';
@@ -35,72 +36,75 @@ class Car extends StatelessWidget {
             color: Colors.white.withAlpha(200),
           ),
 
-          // CupertinoSwitch(value:, onChanged: onChanged)
           Column(
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    width: MediaQuery.of(context).size.width * 0.65,
-                    child: Container(
-                      clipBehavior: Clip.antiAlias,
-                      margin: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: CarColors.gray,
-                        boxShadow: [
-                          BoxShadow(
-                            offset: const Offset(0, 0),
-                            blurRadius: 0,
-                            spreadRadius: 0.3,
-                            color: Colors.black.withAlpha(100),
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.asset(ImageAssets.junji, fit: BoxFit.cover),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            alignment: Alignment.bottomRight,
-                            child: const Text(
-                              "Warning",
-                              style: TextStyle(color: Colors.amber),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const CameraComponent(),
                   Flexible(
                     child: Container(
                       padding: const EdgeInsets.only(top: 20),
                       alignment: Alignment.topRight,
                       height: MediaQuery.of(context).size.height * 0.7,
                       child: Obx(
-                        () => Column(
-                          children: [
-                            const Text("D"),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Transform.rotate(
-                                angle: SteeringAngle.right,
-                                child: CupertinoSwitch(
-                                  inactiveTrackColor: CarColors.gray,
-                                  value: carC.isGearClicked.value,
-                                  onChanged: (value) {
-                                    carC.isGearClicked.value =
-                                        !carC.isGearClicked.value;
-                                  },
+                        () => IntrinsicHeight(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  offset: const Offset(0, 0),
+                                  blurRadius: 2,
+                                  spreadRadius: 0.5,
+                                  color: Colors.black.withAlpha(50),
                                 ),
-                              ),
+                              ],
                             ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  "D",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: carC.isGearClicked.value
+                                        ? CarColors.darkBlue
+                                        : CarColors.gray,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                  ),
+                                  child: Transform.rotate(
+                                    angle: SteeringAngle.right,
+                                    child: CupertinoSwitch(
+                                      activeTrackColor: CarColors.darkBlue,
+                                      inactiveTrackColor: CarColors.red,
+                                      value: carC.isGearClicked.value,
+                                      onChanged: (value) {
+                                        carC.isGearClicked.value =
+                                            !carC.isGearClicked.value;
+                                      },
+                                    ),
+                                  ),
+                                ),
 
-                            const Text("R"),
-                          ],
+                                Text(
+                                  "R",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: !carC.isGearClicked.value
+                                        ? CarColors.red
+                                        : CarColors.gray,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
