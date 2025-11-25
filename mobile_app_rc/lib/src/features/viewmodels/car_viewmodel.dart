@@ -21,6 +21,20 @@ class CarViewmodel extends GetxController {
   StreamSubscription? streamSubscription;
   http.Client? _httpClient;
 
+  Timer? steeringTimer;
+
+  void startSteering(String cmd) {
+    steeringTimer?.cancel();
+    steeringTimer = Timer.periodic(const Duration(milliseconds: 70), (_) {
+      sendCommand(cmd);
+    });
+  }
+
+  void stopSteering() {
+    steeringTimer?.cancel();
+    sendCommand("servoCenter");
+  }
+
   Future<void> startStream() async {
     try {
       if (kDebugMode) {

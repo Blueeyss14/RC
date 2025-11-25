@@ -10,6 +10,9 @@ class SteeringWheelIcon extends StatelessWidget {
 
   final void Function(LongPressStartDetails)? onLongPressStart;
   final void Function(LongPressEndDetails)? onLongPressEnd;
+  final void Function(TapUpDetails)? onTapUp;
+  final void Function()? onTapCancel;
+
   const SteeringWheelIcon({
     super.key,
     this.pedal,
@@ -17,11 +20,15 @@ class SteeringWheelIcon extends StatelessWidget {
     this.onLongPressStart,
     this.onLongPressEnd,
     this.scale,
+    this.onTapUp,
+    this.onTapCancel,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTapUp: onTapUp,
+      onTapCancel: onTapCancel,
       onLongPressStart: onLongPressStart,
       onLongPressEnd: onLongPressEnd,
       child: AnimatedScale(
