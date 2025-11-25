@@ -41,8 +41,10 @@ class PedalComponents extends StatelessWidget {
                 carC.sendCommand(CommandString.backward);
               }
             },
-            onLongPressEnd: (LongPressEndDetails press) =>
-                carC.isThrottleClicked.value = false,
+            onLongPressEnd: (LongPressEndDetails press) {
+              carC.isThrottleClicked.value = false;
+              carC.sendCommand(CommandString.stop);
+            },
             paddingTop: carC.isThrottleClicked.value ? 20 : 0,
 
             pedal: IconAssets.throttle,
