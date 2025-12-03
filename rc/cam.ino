@@ -28,8 +28,7 @@ void startCameraServer();
 
 void setup() {
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  Serial.println();
+  Serial.setDebugOutput(false);
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -53,9 +52,9 @@ void setup() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
 
-  config.frame_size = FRAMESIZE_VGA;
-  config.jpeg_quality = 10;
-  config.fb_count = 2;
+  config.frame_size = FRAMESIZE_HVGA;
+  config.jpeg_quality = 12;
+  config.fb_count = 1;
 
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
@@ -63,22 +62,39 @@ void setup() {
     return;
   }
 
+  sensor_t * s = esp_camera_sensor_get();
+  s->set_brightness(s, 0);
+  s->set_contrast(s, 0);
+  s->set_saturation(s, 0);
+  s->set_special_effect(s, 0);
+  s->set_whitebal(s, 1);
+  s->set_awb_gain(s, 1);
+  s->set_wb_mode(s, 0);
+  s->set_exposure_ctrl(s, 1);
+  s->set_aec2(s, 0);
+  s->set_ae_level(s, 0);
+  s->set_aec_value(s, 300);
+  s->set_gain_ctrl(s, 1);
+  s->set_agc_gain(s, 0);
+  s->set_gainceiling(s, (gainceiling_t)0);
+  s->set_bpc(s, 0);
+  s->set_wpc(s, 1);
+  s->set_raw_gma(s, 1);
+  s->set_lenc(s, 1);
+  s->set_hmirror(s, 0);
+  s->set_vflip(s, 0);
+  s->set_dcw(s, 1);
+  s->set_colorbar(s, 0);
+
   IPAddress local_IP(192, 168, 4, 2);
   IPAddress gateway(192, 168, 4, 1);
   IPAddress subnet(255, 255, 255, 0);
+  WiFi.config(local_IP, gateway, subnet);
 
-  if (!WiFi.config(local_IP, gateway, subnet)) {
-    Serial.println("STA Failed to configure");
-  }
-
-  Serial.println("Connecting WiFi...");
   WiFi.begin(ssid, password);
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
   }
-  Serial.println("");
 
   Serial.print("ESP32-CAM IP: ");
   Serial.println(WiFi.localIP());
@@ -98,19 +114,25 @@ void startCameraServer() {
 
   server.on("/stream", HTTP_GET, []() {
     WiFiClient client = server.client();
-    String header = 
+    client.setNoDelay(true);
+
+    String header =
       "HTTP/1.1 200 OK\r\n"
-      "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
+      "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n"
+      "Access-Control-Allow-Origin: *\r\n\r\n";
     client.print(header);
 
     while (client.connected()) {
       camera_fb_t * fb = esp_camera_fb_get();
-      if (!fb) continue;
+      if (!fb) {
+        delay(10);
+        continue;
+      }
 
       client.printf(
         "--frame\r\n"
         "Content-Type: image/jpeg\r\n"
-        "Content-Length: %u\r\n\r\n", 
+        "Content-Length: %u\r\n\r\n",
         fb->len
       );
 
@@ -119,7 +141,7 @@ void startCameraServer() {
 
       esp_camera_fb_return(fb);
 
-      delay(40);
+      delay(60);
     }
   });
 

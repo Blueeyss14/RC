@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:get/get.dart';
@@ -17,11 +16,17 @@ class CarViewmodel extends GetxController {
   var statusText = "STATUS: -".obs;
   var streamStatus = "Connecting...".obs;
 
-  Uint8List? currentFrame;
+  var currentFrame = Rxn<Uint8List>();
   StreamSubscription? streamSubscription;
   http.Client? _httpClient;
 
   Timer? steeringTimer;
+
+  @override
+  void onInit() {
+    super.onInit();
+    startStream();
+  }
 
   void startSteering(String cmd) {
     steeringTimer?.cancel();
@@ -37,10 +42,6 @@ class CarViewmodel extends GetxController {
 
   Future<void> startStream() async {
     try {
-      if (kDebugMode) {
-        print(streamStatus);
-      }
-
       _httpClient = http.Client();
       final request = http.Request('GET', Uri.parse(Config.camUrl));
 
@@ -85,8 +86,9 @@ class CarViewmodel extends GetxController {
                   startIndex,
                   i - startIndex + 2,
                 );
-                currentFrame = frame;
+                currentFrame.value = frame;
                 streamStatus.value = "Live";
+
                 buffer.clear();
                 buffer.add(
                   Uint8List.view(bytes.buffer, i + 2, bytes.length - i - 2),
@@ -133,5 +135,13 @@ class CarViewmodel extends GetxController {
     } catch (_) {
       statusText.value = "STATUS: failed";
     }
+  }
+
+  @override
+  void onClose() {
+    steeringTimer?.cancel();
+    streamSubscription?.cancel();
+    _httpClient?.close();
+    super.onClose();
   }
 }

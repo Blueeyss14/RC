@@ -31,16 +31,18 @@ class CameraComponent extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (carC.currentFrame != null)
-              Image.memory(
-                width: double.infinity,
-                carC.currentFrame!,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                cacheWidth: 480,
-              )
-            else
-              Column(
+            Obx(() {
+              if (carC.currentFrame.value != null) {
+                return Image.memory(
+                  carC.currentFrame.value!,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  cacheWidth: 480,
+                );
+              }
+
+              return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -48,9 +50,9 @@ class CameraComponent extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(carC.streamStatus.value),
                 ],
-              ),
+              );
+            }),
 
-            // Image.asset(ImageAssets.junji, fit: BoxFit.cover),
             Container(
               padding: const EdgeInsets.all(10),
               alignment: Alignment.bottomRight,
