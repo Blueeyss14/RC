@@ -4,4 +4,5 @@ class CommandString {
   static const String backward = 'backward';
   static const String servoLeft = 'servoLeft';
   static const String servoRight = 'servoRight';
+  static const String center = 'center';
 }
