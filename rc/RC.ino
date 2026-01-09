@@ -14,7 +14,7 @@ const int SPEED_MAX = 1023;
 
 ESP8266WebServer server(80);
 Servo myServo;
-int servoPos = 0;
+int servoPos   = 80;
 
 void handleForward() {
   analogWrite(MOTOR_A, SPEED_MAX);
@@ -35,19 +35,19 @@ void handleStop() {
 }
 
 void handleServoRight() {
-  servoPos = 20;
+  servoPos = 170;
   myServo.write(servoPos);
   server.send(200, "text/plain", "servo right");
 }
 
 void handleServoLeft() {
-  servoPos = -20;
+  servoPos = 45;
   myServo.write(servoPos);
   server.send(200, "text/plain", "servo left");
 }
 
 void handleServoCenter() {
-  servoPos = 0;
+  servoPos = 80;
   myServo.write(servoPos);
   server.send(200, "text/plain", "center");
 }
